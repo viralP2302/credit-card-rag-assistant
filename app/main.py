@@ -8,6 +8,12 @@ app = FastAPI(openapi_url="/openapi.json" if config.enable_docs else None)
 agent = RagAgent()
 
 
+@app.get("/health")
+async def health():
+    """Health check for load balancers and monitoring."""
+    return {"status": "ok", "service": "finance-rag-api"}
+
+
 @app.get("/askBot")
 async def ask_bot(query: str, user_name: str) -> str:
     for step in agent.graph.stream(
