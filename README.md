@@ -1,130 +1,113 @@
 # Finance RAG API
 
-A FastAPI-based **Retrieval-Augmented Generation (RAG)** API for credit card Q&A, built with LangGraph and LangChain. It uses a credit card dataset to build a knowledge base and answers user questions about cards, rewards, and eligibility.
+A **Retrieval-Augmented Generation (RAG)** API for credit card Q&A—built with **FastAPI**, **LangGraph**, and **LangChain**. Ask questions in natural language and get answers grounded in a structured credit card knowledge base. Runs with **Ollama** (no API key) or OpenAI.
 
-![Python](https://img.shields.io/badge/Python-3.9+-blue.svg)
-![FastAPI](https://img.shields.io/badge/FastAPI-0.99+-green.svg)
-![LangChain](https://img.shields.io/badge/LangChain-RAG-orange.svg)
-![LangGraph](https://img.shields.io/badge/LangGraph-Agent-orange.svg)
+[![Python](https://img.shields.io/badge/Python-3.9+-3776ab?logo=python&logoColor=white)](https://www.python.org/)
+[![FastAPI](https://img.shields.io/badge/FastAPI-0.99+-009688?logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com/)
+[![LangChain](https://img.shields.io/badge/LangChain-RAG-1c3c3c?logo=langchain)](https://www.langchain.com)
+[![LangGraph](https://img.shields.io/badge/LangGraph-Agent-1c3c3c)](https://www.langchain.com/langgraph)
+
+---
+
+## What this project does
+
+- **RAG pipeline:** Embed credit card data, retrieve relevant chunks for each query, generate answers with an LLM.
+- **Dual LLM support:** Use **Ollama** locally (no API key) or **OpenAI** (set `OPENAI_API_KEY`).
+- **Production-style API:** FastAPI with OpenAPI docs, health check, and a single `/askBot` endpoint.
+- **Financial domain:** Pre-loaded dataset and prompts tuned for credit card–related questions (rewards, fees, eligibility).
 
 ---
 
 ## Demo
 
-**Add a short screen recording (GIF or video)** for showcase: run the API, open `/docs`, try a query like **"Which card has the best cashback for groceries?"** and show the response. Save the recording as **`.github/images/demo.gif`**; then the image below will display.
+<video src="demo_video/demo.mov" controls width="700"></video>
 
-<!-- Once you add .github/images/demo.gif, the next line will show it -->
-![Demo](.github/images/demo.gif)
-
-*Use a query different from the upstream template (e.g. not "What's the best card for travel?"). Good options:* **"Which card has the best cashback for groceries?"** or **"Recommend a card with no annual fee and a good sign-up bonus"**.
+*Screen recording: Swagger UI → GET /askBot with a credit card query → model response.*
 
 ---
-
-## Features
-
-- **RAG pipeline**: Embeddings + vector store (in-memory) + LLM for grounded answers
-- **Credit card QA**: Pre-loaded knowledge base from structured card data
-- **LangGraph agent**: Query → retrieve → generate flow
-- **FastAPI**: OpenAPI docs at `/docs`, health check at `/health`
-- **Python 3.9+**: Modern async API
 
 ## Tech stack
 
-- [FastAPI](https://fastapi.tiangolo.com/) – API framework
-- [LangChain](https://www.langchain.com) / [LangGraph](https://www.langchain.com/langgraph) – RAG and agent graph
-- [HuggingFace sentence-transformers](https://huggingface.co/sentence-transformers) – embeddings
-- OpenAI (e.g. `gpt-4o-mini`) – chat model
+| Layer        | Technology |
+|-------------|------------|
+| API         | FastAPI, Uvicorn |
+| RAG / Agent | LangChain, LangGraph |
+| Embeddings  | HuggingFace `sentence-transformers/all-mpnet-base-v2` |
+| Vector store| In-memory (LangChain) |
+| LLM         | Ollama (default, e.g. `llama3.2`) or OpenAI `gpt-4o-mini` |
 
 ---
 
-## Get started
+## Quick start
 
-### Prerequisites
-
-- **Python 3.9+** – check with `python3 --version`
-- **OpenAI API key** – [create one here](https://platform.openai.com/api-keys)
-
-### Clone and setup
+**Prerequisites:** Python 3.9+, and either [Ollama](https://ollama.com) (recommended) or an OpenAI API key.
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/finance-rag-api.git
-cd finance-rag-api
-```
-
-### Virtual environment
-
-```bash
+git clone https://github.com/viralP2302/credit-card-rag-assistant.git
+cd credit-card-rag-assistant
 python3 -m venv venv
-source venv/bin/activate   # macOS/Linux
-# or: venv\Scripts\activate.bat   # Windows
-```
-
-### Dependencies
-
-```bash
+source venv/bin/activate   # Windows: venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
-### Run locally
-
-From the **project root**:
+**Run with Ollama (no API key):**
 
 ```bash
-export OPENAI_API_KEY=your_api_key_here
+ollama pull llama3.2    # one-time
 uvicorn app.main:app --reload
 ```
 
-API base: **http://localhost:8000**
+**Or with OpenAI:**
 
-- **Docs (Swagger):** http://localhost:8000/docs  
+```bash
+export OPENAI_API_KEY=your_key
+uvicorn app.main:app --reload
+```
+
+- **API docs:** http://localhost:8000/docs  
 - **Health:** http://localhost:8000/health  
 - **Ask the bot:** `GET /askBot?query=...&user_name=...`
 
-Try a query different from the upstream demo, e.g. **"Which card has the best cashback for groceries?"** or **"Recommend a card with no annual fee."**
+---
+
+## API
+
+| Endpoint    | Method | Description |
+|------------|--------|-------------|
+| `/health`  | GET    | Returns `{"status":"ok","service":"finance-rag-api"}`. |
+| `/askBot`  | GET    | **query** (string), **user_name** (string). Returns the model’s answer as plain text. |
+
+Use the **Swagger UI** at `/docs` to try both.
 
 ---
 
-## Code structure
+## Project structure
 
-| Path | Description |
-|------|-------------|
-| `app/main.py` | FastAPI app, `/health`, `/askBot` |
-| `app/rag/agent.py` | LangGraph RAG agent, vector store, embeddings |
-| `app/models/graph_state.py` | Shared state for the graph |
-| `app/rag/credit_cards.json` | Credit card knowledge base (from ETL) |
-| `etl/` | Optional ETL: Excel → JSON for the dataset |
-
----
-
-## API overview
-
-- **`GET /health`** – Returns `{"status": "ok", "service": "finance-rag-api"}`.
-- **`GET /askBot`** – Query params: `query` (string), `user_name` (string). Returns the model’s answer as plain text.
+```
+├── app/
+│   ├── main.py           # FastAPI app, /health, /askBot
+│   ├── rag/
+│   │   ├── agent.py      # LangGraph RAG agent, Ollama/OpenAI, vector store
+│   │   └── credit_cards.json
+│   └── models/
+│       └── graph_state.py
+├── etl/                  # Optional: Excel → JSON for the dataset
+├── requirements.txt
+└── README.md
+```
 
 ---
 
-## Resources
+## Environment (optional)
 
-- [LangChain tutorials](https://python.langchain.com/docs/tutorials/)
-- [LangGraph intro](https://academy.langchain.com/courses/intro-to-langgraph)
-- [RAG with LangChain](https://python.langchain.com/docs/tutorials/rag/)
-- [FastAPI docs](https://fastapi.tiangolo.com/)
-
----
-
-## Publish to your GitHub
-
-This repo has **no upstream git history** (clean single-branch history). To push to your GitHub:
-
-1. Create a **new empty repo** on GitHub (e.g. `finance-rag-api` or `credit-card-rag-assistant`).
-2. Add it as `origin` and push:
-   ```bash
-   git remote add origin https://github.com/YOUR_USERNAME/YOUR_REPO_NAME.git
-   git push -u origin main
-   ```
+| Variable         | Description |
+|------------------|-------------|
+| `OPENAI_API_KEY` | If set, uses OpenAI instead of Ollama. |
+| `OLLAMA_MODEL`   | Ollama model name (default: `llama3.2`). |
+| `USE_OLLAMA`     | Set to `1` to force Ollama even if `OPENAI_API_KEY` is set. |
 
 ---
 
 ## Attribution
 
-This project is based on [paranjapeved/fastapi-rag-template](https://github.com/paranjapeved/fastapi-rag-template). Extended with a health endpoint, updated dependencies, and this README.
+Based on [paranjapeved/fastapi-rag-template](https://github.com/paranjapeved/fastapi-rag-template). Extended with Ollama support, health endpoint, Pydantic v2, and this README.

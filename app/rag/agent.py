@@ -1,10 +1,10 @@
 from langchain_huggingface import HuggingFaceEmbeddings
-import getpass
 import os
 from langchain_community.vectorstores import InMemoryVectorStore
 import json
-from langchain.chat_models import init_chat_model
 from langgraph.graph import StateGraph
+from langchain_ollama import ChatOllama
+from langchain_openai import ChatOpenAI
 from langchain_core.tools import tool
 from langgraph.prebuilt import create_react_agent
 from langchain_core.messages import SystemMessage, ToolMessage
@@ -26,16 +26,20 @@ class RagAgent():
         - Initializing the graph builder
         - Initializing the graph
         """
-        if not os.environ.get("OPENAI_API_KEY"):
-            os.environ["OPENAI_API_KEY"] = getpass.getpass("Enter API key for OpenAI: ")
-
-        self.llm = init_chat_model("gpt-4o-mini", model_provider="openai")
+        # Use Ollama (no API key) when OPENAI_API_KEY is not set; otherwise use OpenAI
+        use_ollama = not os.environ.get("OPENAI_API_KEY") or os.environ.get("USE_OLLAMA", "").lower() in ("1", "true", "yes")
+        if use_ollama:
+            ollama_model = os.environ.get("OLLAMA_MODEL", "llama3.2")
+            self.llm = ChatOllama(model=ollama_model)
+        else:
+            self.llm = ChatOpenAI(model="gpt-4o-mini")
         self.llm_with_tools = self.llm.bind_tools([self.retrieve])
         # Embeddings model
         self.embeddings = HuggingFaceEmbeddings(model_name="sentence-transformers/all-mpnet-base-v2")
 
-        # load data from json file
-        with open("./app/rag/credit_cards.json", "r") as f:
+        # load data from json file (path relative to this file so it works from any cwd)
+        _here = os.path.dirname(os.path.abspath(__file__))
+        with open(os.path.join(_here, "credit_cards.json"), "r") as f:
             data = json.load(f)
         cards_docs = self.format_content_to_docs(data)
         # In-memory vector store

@@ -1,5 +1,7 @@
 # Github provided Python .gitignore
 
+# Local run guide (not for public repo)
+RUN_ON_GPU.md
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
