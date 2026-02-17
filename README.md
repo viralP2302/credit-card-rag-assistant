@@ -20,9 +20,11 @@ A **Retrieval-Augmented Generation (RAG)** API for credit card Q&A—built with 
 
 ## Demo
 
-<video src="demo_video/demo.mov" controls width="700"></video>
+**Swagger UI → GET /askBot with a credit card query → model response.**
 
-*Screen recording: Swagger UI → GET /askBot with a credit card query → model response.*
+<video src="https://github.com/viralP2302/credit-card-rag-assistant/raw/main/demo_video/demo.mov" controls width="700" style="max-width:100%; border-radius:8px;"></video>
+
+*[Open in new tab](https://github.com/viralP2302/credit-card-rag-assistant/raw/main/demo_video/demo.mov) if the video does not play above.*
 
 ---
 
