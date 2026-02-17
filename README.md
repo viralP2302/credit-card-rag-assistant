@@ -24,7 +24,6 @@ A **Retrieval-Augmented Generation (RAG)** API for credit card Q&A—built with 
 
 ![Demo](demo_video/demo.gif)
 
-*To show the demo inline: convert `demo.mov` to `demo.gif` (e.g. [ezgif.com/video-to-gif](https://ezgif.com/video-to-gif) or run `demo_video/convert-to-gif.sh` after installing ffmpeg), add `demo_video/demo.gif` to the repo, and push. Video link: [open in new tab](https://github.com/viralP2302/credit-card-rag-assistant/raw/main/demo_video/demo.mov).*
 
 ---
 
